@@ -6,3 +6,4 @@
 *.sqlite
 data/raw/
 .vscode/
+.claude
