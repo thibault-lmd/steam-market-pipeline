@@ -31,6 +31,17 @@ CREATE TABLE ingestion_runs (
     error_message   TEXT
 );
 
+CREATE TABLE ingestion_errors (
+    error_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    run_id      INTEGER NOT NULL REFERENCES ingestion_runs(run_id) ON DELETE CASCADE,
+    appid       INTEGER,
+    endpoint    TEXT NOT NULL,          -- 'appdetails', 'appreviews'
+    http_status SMALLINT,
+    message     TEXT,
+    occurred_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX ON ingestion_errors (run_id);
+
 CREATE TABLE price_history (
     appid            INTEGER NOT NULL REFERENCES games(appid) ON DELETE CASCADE,
     run_id           INTEGER NOT NULL REFERENCES ingestion_runs(run_id) ON DELETE CASCADE,
@@ -53,4 +64,31 @@ CREATE TABLE review_history (
     review_score_desc TEXT,   
     recorded_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (appid, run_id)
+);
+
+CREATE TABLE tracked_apps (
+    appid       INTEGER PRIMARY KEY REFERENCES games(appid) ON DELETE CASCADE,
+    is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+    added_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    source      TEXT   -- 'top_sellers', 'manual', ...
+);
+
+CREATE TABLE player_count_history (
+    appid         INTEGER NOT NULL REFERENCES games(appid) ON DELETE CASCADE,
+    run_id        INTEGER NOT NULL REFERENCES ingestion_runs(run_id) ON DELETE CASCADE,
+    player_count  INTEGER NOT NULL,
+    recorded_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (appid, run_id)
+);
+
+CREATE TABLE tags (
+    tag_id  INTEGER PRIMARY KEY,
+    name    TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE game_tags (
+    appid   INTEGER NOT NULL REFERENCES games(appid) ON DELETE CASCADE,
+    tag_id  INTEGER NOT NULL REFERENCES tags(tag_id) ON DELETE CASCADE,
+    votes   INTEGER,
+    PRIMARY KEY (appid, tag_id)
 );
