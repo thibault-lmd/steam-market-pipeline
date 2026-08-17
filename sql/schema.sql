@@ -42,3 +42,15 @@ CREATE TABLE price_history (
     recorded_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (appid, run_id)
 );
+
+CREATE TABLE review_history (
+    appid            INTEGER NOT NULL REFERENCES games(appid) ON DELETE CASCADE,
+    run_id           INTEGER NOT NULL REFERENCES ingestion_runs(run_id) ON DELETE CASCADE,
+    total_positive   INTEGER NOT NULL,
+    total_negative   INTEGER NOT NULL,
+    total_reviews    INTEGER GENERATED ALWAYS AS (total_positive + total_negative) STORED,
+    review_score     SMALLINT CHECK (review_score BETWEEN 0 AND 9),
+    review_score_desc TEXT,   
+    recorded_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (appid, run_id)
+);
