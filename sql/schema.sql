@@ -35,7 +35,7 @@ CREATE TABLE ingestion_errors (
     error_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     run_id      INTEGER NOT NULL REFERENCES ingestion_runs(run_id) ON DELETE CASCADE,
     appid       INTEGER,
-    endpoint    TEXT NOT NULL,          -- 'appdetails', 'appreviews'
+    endpoint    TEXT NOT NULL,         
     http_status SMALLINT,
     message     TEXT,
     occurred_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -70,7 +70,7 @@ CREATE TABLE tracked_apps (
     appid       INTEGER PRIMARY KEY REFERENCES games(appid) ON DELETE CASCADE,
     is_active   BOOLEAN NOT NULL DEFAULT TRUE,
     added_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-    source      TEXT   -- 'top_sellers', 'manual', ...
+    source      TEXT   
 );
 
 CREATE TABLE player_count_history (
