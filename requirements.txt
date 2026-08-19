@@ -1,0 +1,8 @@
+# Direct dependencies. Transitive versions are resolved by pip.
+
+python-dotenv>=1.2      # reads .env
+psycopg[binary]>=3.3    # PostgreSQL client (binary = no local compilation)
+httpx>=0.28             # HTTP calls to the Steam APIs
+tenacity>=9.1           # retry with backoff on HTTP 429
+
+pytest>=9.1             # parsing tests

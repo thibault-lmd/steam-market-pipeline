@@ -35,7 +35,7 @@ CREATE TABLE ingestion_errors (
     error_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     run_id      INTEGER NOT NULL REFERENCES ingestion_runs(run_id) ON DELETE CASCADE,
     appid       INTEGER,
-    endpoint    TEXT NOT NULL,         
+    endpoint    TEXT NOT NULL,
     http_status SMALLINT,
     message     TEXT,
     occurred_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -61,7 +61,7 @@ CREATE TABLE review_history (
     total_negative   INTEGER NOT NULL,
     total_reviews    INTEGER GENERATED ALWAYS AS (total_positive + total_negative) STORED,
     review_score     SMALLINT CHECK (review_score BETWEEN 0 AND 9),
-    review_score_desc TEXT,   
+    review_score_desc TEXT,
     recorded_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (appid, run_id)
 );
@@ -70,7 +70,7 @@ CREATE TABLE tracked_apps (
     appid       INTEGER PRIMARY KEY REFERENCES games(appid) ON DELETE CASCADE,
     is_active   BOOLEAN NOT NULL DEFAULT TRUE,
     added_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-    source      TEXT   
+    source      TEXT
 );
 
 CREATE TABLE player_count_history (
