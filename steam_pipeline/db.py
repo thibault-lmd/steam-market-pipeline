@@ -15,9 +15,7 @@ def open_run(conn: psycopg.Connection) -> int:
 
     Commits immediately so a later crash still leaves a trace of the attempt.
     """
-    row = conn.execute(
-        "INSERT INTO ingestion_runs DEFAULT VALUES RETURNING run_id"
-    ).fetchone()
+    row = conn.execute("INSERT INTO ingestion_runs DEFAULT VALUES RETURNING run_id").fetchone()
     conn.commit()
     return row[0]
 
