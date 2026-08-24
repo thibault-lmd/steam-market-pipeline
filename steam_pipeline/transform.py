@@ -3,9 +3,19 @@
 from datetime import date
 
 MONTHS = {
-    "mai": 5,
-    "aug": 8,
-    }
+    "jan": 1, "janv": 1, "janvier": 1, "january": 1,
+    "fev": 2, "févr": 2, "février": 2, "feb": 2, "february": 2,
+    "mar": 3, "mars": 3, "march": 3,
+    "avr": 4, "avril": 4, "apr": 4, "april": 4,
+    "mai": 5, "may": 5,
+    "juin": 6, "jun": 6, "june": 6,
+    "juil": 7, "juillet": 7, "jul": 7, "july": 7,
+    "aout": 8, "août": 8, "aug": 8, "august": 8,
+    "sep": 9, "sept": 9, "septembre": 9, "september": 9,
+    "oct": 10, "octobre": 10, "october": 10,
+    "nov": 11, "novembre": 11, "november": 11,
+    "dec": 12, "déc": 12, "décembre": 12, "december": 12,
+}
 
 def parse_release_date(date_str, coming_soon=False):
     """Parse the release date string from the Steam API into a date object."""
@@ -24,7 +34,17 @@ def parse_release_date(date_str, coming_soon=False):
     year = int(words[2])
     return date(year, month, day)
 
-    
+def parse_game(appdetails: dict) -> dict:
+    """Parse the game details from the Steam API into a dictionary for the database."""
 
-
-    
+    game = {}
+    game["appid"] = appdetails.get("steam_appid")
+    game["name"] = appdetails.get("name")
+    game["release_date"] = parse_release_date(appdetails.get("release_date", {}).get("date", ""), appdetails.get("release_date", {}).get("coming_soon", False))
+    game["is_free"] = appdetails.get("is_free", False)
+    game["price_overview"] = appdetails.get("price_overview", {})
+    game["platforms"] = appdetails.get("platforms", {})
+    game["metacritic"] = appdetails.get("metacritic", {})
+    game["categories"] = [category.get("description") for category in appdetails.get("categories", [])]
+    game["genres"] = [genre.get("description") for genre in appdetails.get("genres", [])]
+    return game
