@@ -5,6 +5,21 @@ import psycopg
 from .config import DATABASE_URL
 
 
+def load_tracked_apps(conn: psycopg.Connection, limit: int | None = None) -> list[int]:
+    """Return active appids, ordered so every run processes them in the same order.
+
+    Without ORDER BY, Postgres is free to return rows in a different order
+    each time, which turns "the 47th game crashes" into an unreproducible bug.
+    """
+    query = "SELECT appid FROM tracked_apps WHERE is_active ORDER BY appid"
+    params: tuple = ()
+    if limit is not None:
+        query += " LIMIT %s"
+        params = (limit,)
+    rows = conn.execute(query, params).fetchall()
+    return [row[0] for row in rows]
+
+
 def connect() -> psycopg.Connection:
     """Open a connection. Not a context manager: run.py controls its own commits."""
     return psycopg.connect(DATABASE_URL)
