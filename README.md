@@ -25,7 +25,7 @@ so the tables exist after the first `docker compose up`.
 
 ```powershell
 git pull
-docker compose up -d        # PostgreSQL on localhost:5432
+docker compose up -d        
 .venv\Scripts\Activate.ps1
 ```
 
