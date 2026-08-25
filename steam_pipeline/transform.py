@@ -27,7 +27,7 @@ def parse_release_date(date_str, coming_soon=False):
     without_commas = date_str.replace(",", "")
     without_commas = without_commas.lower()
     words = without_commas.split()
-    if words == []:
+    if len(words) != 3:
         return None
     day = int(words[0])
     month = MONTHS.get(words[1], None)
