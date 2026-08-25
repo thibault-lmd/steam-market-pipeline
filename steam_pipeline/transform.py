@@ -41,10 +41,9 @@ def parse_game(appdetails: dict) -> dict:
     game["appid"] = appdetails.get("steam_appid")
     game["name"] = appdetails.get("name")
     game["release_date"] = parse_release_date(appdetails.get("release_date", {}).get("date", ""), appdetails.get("release_date", {}).get("coming_soon", False))
-    game["developers"] = appdetails.get("developers", [])
-    game["publishers"] = appdetails.get("publishers", [])
+    game["developer"] = appdetails.get("developer", [None])[0]
+    game["publisher"] = appdetails.get("publisher", [None])[0]
     game["is_free"] = appdetails.get("is_free", False)
-    game["price_overview"] = appdetails.get("price_overview", {})
-    game["first_seen_at"] = date.tod
-    
+    game["first_seen_at"] = date.today()
+
     return game
