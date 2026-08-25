@@ -27,6 +27,8 @@ def parse_release_date(date_str, coming_soon=False):
     without_commas = date_str.replace(",", "")
     without_commas = without_commas.lower()
     words = without_commas.split()
+    if words == []:
+        return None
     day = int(words[0])
     month = MONTHS.get(words[1], None)
     if month is None:
@@ -36,14 +38,15 @@ def parse_release_date(date_str, coming_soon=False):
 
 def parse_game(appdetails: dict) -> dict:
     """Parse the game details from the Steam API into a dictionary for the database."""
+    rel = appdetails.get("release_date", {})
 
     game = {}
     game["appid"] = appdetails.get("steam_appid")
     game["name"] = appdetails.get("name")
-    game["release_date"] = parse_release_date(appdetails.get("release_date", {}).get("date", ""), appdetails.get("release_date", {}).get("coming_soon", False))
-    game["developer"] = appdetails.get("developer", [None])[0]
-    game["publisher"] = appdetails.get("publisher", [None])[0]
+    game["release_date"] = parse_release_date(rel.get("date", ""), rel.get("coming_soon", False))
+    game["developers"] = appdetails.get("developers", [])
+    game["publishers"] = appdetails.get("publishers", [])
     game["is_free"] = appdetails.get("is_free", False)
     game["first_seen_at"] = date.today()
-
+    
     return game

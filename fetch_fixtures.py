@@ -12,14 +12,14 @@ from pathlib import Path
 
 import httpx
 
-from steam_pipeline.config import COUNTRY_CODE, REQUEST_DELAY, STEAM_API_BASE, STEAM_STORE_BASE
+from steam_pipeline.config import COUNTRY_CODE, LANGUAGE, REQUEST_DELAY, STEAM_API_BASE, STEAM_STORE_BASE
 
 FIXTURES_DIR = Path(__file__).parent / "tests" / "fixtures"
 
 FETCHES = [
-    ("appdetails_292030", f"{STEAM_STORE_BASE}/api/appdetails", {"appids": 292030, "cc": COUNTRY_CODE}),
-    ("appdetails_730", f"{STEAM_STORE_BASE}/api/appdetails", {"appids": 730, "cc": COUNTRY_CODE}),
-    ("appdetails_invalid", f"{STEAM_STORE_BASE}/api/appdetails", {"appids": 999999999, "cc": COUNTRY_CODE}),
+    ("appdetails_292030", f"{STEAM_STORE_BASE}/api/appdetails", {"appids": 292030, "cc": COUNTRY_CODE, "l": LANGUAGE}),
+    ("appdetails_730", f"{STEAM_STORE_BASE}/api/appdetails", {"appids": 730, "cc": COUNTRY_CODE, "l": LANGUAGE}),
+    ("appdetails_invalid", f"{STEAM_STORE_BASE}/api/appdetails", {"appids": 999999999, "cc": COUNTRY_CODE, "l": LANGUAGE}),
     ("appreviews_292030", f"{STEAM_STORE_BASE}/appreviews/292030", {"json": 1, "num_per_page": 0, "language": "all"}),
     ("players_292030", f"{STEAM_API_BASE}/ISteamUserStats/GetNumberOfCurrentPlayers/v1/", {"appid": 292030}),
 ]

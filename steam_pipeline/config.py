@@ -26,5 +26,6 @@ STEAM_API_BASE = "https://api.steampowered.com"
 
 # getenv always returns a string, hence the casts.
 COUNTRY_CODE = os.getenv("STEAM_CC", "fr")                  # sets prices and currency
+LANGUAGE = os.getenv("STEAM_LANG", "english")               # sets text language (release dates, descriptions)
 REQUEST_DELAY = float(os.getenv("REQUEST_DELAY", "1.5"))    # seconds between calls
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "50"))             # games between commits
