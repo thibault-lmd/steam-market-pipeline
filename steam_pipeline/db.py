@@ -19,6 +19,31 @@ def load_tracked_apps(conn: psycopg.Connection, limit: int | None = None) -> lis
     rows = conn.execute(query, params).fetchall()
     return [row[0] for row in rows]
 
+def upsert(conn: psycopg.Connection, game: dict) -> dict:
+    """Insert or update a game record."""
+    row = conn.execute(
+        """
+        INSERT INTO games (appid, name, release_date, developer, publisher, is_free)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON CONFLICT (appid) DO UPDATE SET
+            name = EXCLUDED.name,
+            release_date = EXCLUDED.release_date,
+            developer = EXCLUDED.developer,
+            publisher = EXCLUDED.publisher,
+            is_free = EXCLUDED.is_free
+        RETURNING *
+        """,
+        (
+            game["appid"],
+            game["name"],
+            game["release_date"],
+            ", ".join(game["developers"]) or None,
+            ", ".join(game["publishers"]) or None,
+            game["is_free"],
+        ),
+    ).fetchone()
+    return row
+
 
 def connect() -> psycopg.Connection:
     """Open a connection. Not a context manager: run.py controls its own commits."""
