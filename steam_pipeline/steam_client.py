@@ -4,7 +4,7 @@ import httpx
 import time 
 
 from tenacity import retry, stop_after_attempt, wait_exponential
-from .config import COUNTRY_CODE, LANGUAGE, STEAM_STORE_BASE, REQUEST_DELAY
+from .config import COUNTRY_CODE, LANGUAGE, STEAM_API_BASE, STEAM_STORE_BASE, REQUEST_DELAY
 
 def extract_json(appid: int) -> dict | None:
     """Fetch raw appdetails JSON for a single appid from the Steam API."""
@@ -39,6 +39,32 @@ def fetch_prices(appids: list[int]) -> dict[int, dict | None]:
         else:
             prices[appid] = entry["data"].get("price_overview")
     return prices
+
+def fetch_reviews(appid: int) -> dict | None:
+    """Fetch review summary for a single appid from the Steam API."""
+    url = f"{STEAM_STORE_BASE}/appreviews/{appid}"
+    params = {"json": 1, "num_per_page": 0, "language": "all"}
+
+    rjson = _get(url, params)
+
+    if not rjson["success"]:
+        return None
+
+    return rjson["query_summary"]
+
+
+def fetch_player_count(appid: int) -> int | None:
+    """Fetch current player count for a single appid from the Steam API."""
+    url = f"{STEAM_API_BASE}/ISteamUserStats/GetNumberOfCurrentPlayers/v1/"
+    params = {"appid": appid}
+
+    rjson = _get(url, params)
+    response = rjson["response"]
+
+    if response["result"] != 1:
+        return None
+
+    return response["player_count"]
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
