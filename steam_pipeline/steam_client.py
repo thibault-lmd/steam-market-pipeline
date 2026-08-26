@@ -1,19 +1,17 @@
 """API calls to the Steam API, and returns JSON raw data."""
 
 import httpx
+import time 
 
-from .config import COUNTRY_CODE, LANGUAGE, STEAM_STORE_BASE
-
+from tenacity import retry, stop_after_attempt, wait_exponential
+from .config import COUNTRY_CODE, LANGUAGE, STEAM_STORE_BASE, REQUEST_DELAY
 
 def extract_json(appid: int) -> dict | None:
     """Fetch raw appdetails JSON for a single appid from the Steam API."""
     url = f"{STEAM_STORE_BASE}/api/appdetails"
     params = {"appids": appid, "cc": COUNTRY_CODE, "l": LANGUAGE}
 
-    response = httpx.get(url, params=params)
-    response.raise_for_status()
-
-    rjson = response.json()
+    rjson = _get(url, params)
     entry = rjson[str(appid)]
 
     if not entry["success"]:
@@ -21,4 +19,31 @@ def extract_json(appid: int) -> dict | None:
 
     return entry["data"]
 
+def fetch_prices(appids: list[int]) -> dict[int, dict | None]:
+    """Fetch price_overview for a batch of appids from the Steam API."""
+    url = f"{STEAM_STORE_BASE}/api/appdetails"
+    params = {
+        "appids": ",".join(str(appid) for appid in appids),
+        "cc": COUNTRY_CODE,
+        "l": LANGUAGE,
+        "filters": "price_overview",
+    }
 
+    rjson = _get(url, params)
+
+    prices = {}
+    for appid in appids:
+        entry = rjson[str(appid)]
+        if not entry["success"] or not entry["data"]:
+            prices[appid] = None
+        else:
+            prices[appid] = entry["data"].get("price_overview")
+    return prices
+
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+def _get(url: str, params: dict) -> dict:
+    time.sleep(REQUEST_DELAY)
+    response = httpx.get(url, params=params)
+    response.raise_for_status()
+    return response.json()
