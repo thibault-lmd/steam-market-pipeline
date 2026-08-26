@@ -56,13 +56,15 @@ def seed_game(conn: psycopg.Connection, appid: int, name: str) -> None:
     )
 
 def add_tracked_app(conn: psycopg.Connection, appid: int, source: str) -> None:
-    """ Insert a new tracked app. If it already exists, mark it active and update the source."""
+    """Insert a new tracked app. Updates source on conflict; never touches is_active."""
+
     conn.execute(
         """
         INSERT INTO tracked_apps (appid, source)
         VALUES (%s, %s)
         ON CONFLICT (appid) DO UPDATE SET
-            source = EXCLUDED.source
+        source = EXCLUDED.source
+
         """,
         (appid, source),
     )
