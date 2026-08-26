@@ -67,7 +67,13 @@ def fetch_player_count(appid: int) -> int | None:
     url = f"{STEAM_API_BASE}/ISteamUserStats/GetNumberOfCurrentPlayers/v1/"
     params = {"appid": appid}
 
-    rjson = _get(url, params)
+    try:
+        rjson = _get(url, params)
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            return None
+        raise
+    
     response = rjson["response"]
 
     if response["result"] != 1:

@@ -44,6 +44,28 @@ def upsert(conn: psycopg.Connection, game: dict) -> dict:
     ).fetchone()
     return row
 
+def seed_game(conn: psycopg.Connection, appid: int, name: str) -> None:
+    """Insert a placeholder game record for a tracked app."""
+    conn.execute(
+        """
+        INSERT INTO games (appid, name)
+        VALUES (%s, %s)
+        ON CONFLICT (appid) DO NOTHING
+        """,
+        (appid, name),
+    )
+
+def add_tracked_app(conn: psycopg.Connection, appid: int, source: str) -> None:
+    """ Insert a new tracked app. If it already exists, mark it active and update the source."""
+    conn.execute(
+        """
+        INSERT INTO tracked_apps (appid, source)
+        VALUES (%s, %s)
+        ON CONFLICT (appid) DO UPDATE SET
+            source = EXCLUDED.source
+        """,
+        (appid, source),
+    )
 
 def connect() -> psycopg.Connection:
     """Open a connection. Not a context manager: run.py controls its own commits."""

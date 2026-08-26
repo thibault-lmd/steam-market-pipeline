@@ -7,7 +7,7 @@ placeholder, and tracked_apps uses DO NOTHING because there is nothing
 here worth updating on a repeat run.
 """
 
-from steam_pipeline.db import connect
+from steam_pipeline.db import add_tracked_app, connect, seed_game
 
 # (appid, placeholder name) - real names/dates/publishers come from
 # appdetails later; this is just enough to satisfy the FK.
@@ -24,22 +24,8 @@ def main() -> None:
     conn = connect()
     try:
         for appid, name in SEED_APPS:
-            conn.execute(
-                """
-                INSERT INTO games (appid, name)
-                VALUES (%s, %s)
-                ON CONFLICT (appid) DO NOTHING
-                """,
-                (appid, name),
-            )
-            conn.execute(
-                """
-                INSERT INTO tracked_apps (appid, source)
-                VALUES (%s, 'manual')
-                ON CONFLICT (appid) DO NOTHING
-                """,
-                (appid,),
-            )
+            seed_game(conn, appid, name)
+            add_tracked_app(conn, appid, "manual")
         conn.commit()
         print(f"seeded {len(SEED_APPS)} apps into games/tracked_apps")
     finally:
