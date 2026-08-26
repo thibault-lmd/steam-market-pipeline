@@ -3,8 +3,17 @@
 import httpx
 import time 
 
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception 
 from .config import COUNTRY_CODE, LANGUAGE, STEAM_API_BASE, STEAM_STORE_BASE, REQUEST_DELAY
+
+
+def _is_retryable(exception: Exception) -> bool:
+    """Return True if the exception is retryable."""
+    if isinstance(exception, httpx.RequestError):
+        return True
+    if isinstance(exception, httpx.HTTPStatusError) and exception.response.status_code in {429, 500, 502, 503, 504}:
+        return True
+    return False
 
 def extract_json(appid: int) -> dict | None:
     """Fetch raw appdetails JSON for a single appid from the Steam API."""
@@ -67,9 +76,10 @@ def fetch_player_count(appid: int) -> int | None:
     return response["player_count"]
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10), retry=retry_if_exception(_is_retryable))
 def _get(url: str, params: dict) -> dict:
     time.sleep(REQUEST_DELAY)
     response = httpx.get(url, params=params)
     response.raise_for_status()
     return response.json()
+
